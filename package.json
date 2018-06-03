@@ -1,0 +1,22 @@
+{
+  "name": "partykulaer",
+  "version": "0.0.0",
+  "description": "Node-driven WG-Party",
+  "main": "index.js",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jue89/node-partykulaer.git"
+  },
+  "author": "Jue <me@jue.yt>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jue89/node-partykulaer/issues"
+  },
+  "homepage": "https://github.com/jue89/node-partykulaer#readme"
+}

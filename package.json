@@ -5,6 +5,7 @@
   "main": "index.js",
   "private": true,
   "dependencies": {
+    "dmx4pi": "^1.0.0",
     "global-rainbow": "^1.0.0",
     "onoff": "^3.1.0",
     "spi": "^0.2.0"

@@ -5,7 +5,9 @@
   "main": "index.js",
   "private": true,
   "dependencies": {
-    "onoff": "^3.1.0"
+    "global-rainbow": "^1.0.0",
+    "onoff": "^3.1.0",
+    "spi": "^0.2.0"
   },
   "devDependencies": {},
   "scripts": {

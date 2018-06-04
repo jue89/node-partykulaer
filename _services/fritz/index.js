@@ -1,10 +1,14 @@
 const GR = require('global-rainbow');
 const SPI = require('spi');
+const SerialPort = require('serialport');
  
 const spi = new SPI.Spi('/dev/spidev1.0', {
 	'mode': SPI.MODE['MODE_0'],  // always set mode as the first option
 	'chipSelect': SPI.CS['none'] // 'none', 'high' - defaults to low
 }, function(s){s.open();});
+
+const sp = new SerialPort('/dev/ttyUSB0', { baudRate: 115200 });
+const ws2811 = (color) => sp.write(new Buffer.from([42].concat(color)));
  
 const shift = (pattern, offset) => pattern.map((row) => {
 	return row.map((item, n, row) => row[Math.abs((n + offset) % row.length)]);
@@ -45,14 +49,23 @@ let frame = 0;
 let defInterval;
 const startDefaultAnimation = () => {
 	defInterval = setInterval(() => {
-		const curPattern = pattern[patternName](frame++);;
-		const curPixels = pattern2color(curPattern, color.get());
+		// Get current color
+		const curColor = color.get();
+
+		// Send it to WS2811
+		ws2811(curColor);
+
+		// Calc pattern for Firtz Kola
+		const curPattern = pattern[patternName](frame++);
+		const curPixels = pattern2color(curPattern, curColor);
 		const curRows = curPixels
 			.reverse()
 			.map((row, n) => (n % 2) ? row : row.reverse())
 			.reduce((acc, p) => acc.concat(p), []);
 		const curCols = curRows
 			.reduce((acc, p) => acc.concat(p), []);
+
+		// Send pattern to Fritz Kola
 		spi.write(Buffer.from(curCols));
 	}, 1000 / 25);
 };
@@ -65,6 +78,9 @@ const stopDefaultAnimation = () => {
 let artnetTimeout;
 const displayArtnet = (color) => {
 	if (defInterval) stopDefaultAnimation();
+
+	// Send color to WS2811
+	ws2811(color.slice(0,3));
 
 	// Send color of the first channel
 	const buf = Buffer.alloc(3 * 24);

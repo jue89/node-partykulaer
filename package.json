@@ -8,6 +8,7 @@
     "dmx4pi": "^1.0.0",
     "global-rainbow": "^1.0.0",
     "onoff": "^3.1.0",
+    "serialport": "^6.2.0",
     "spi": "^0.2.0"
   },
   "devDependencies": {},

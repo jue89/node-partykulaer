@@ -5,13 +5,11 @@
   "main": "index.js",
   "private": true,
   "dependencies": {
-    "dmx4pi": "^1.0.0",
+    "dmx4pi": "^1.0.1",
     "global-rainbow": "^1.0.0",
-    "onoff": "^3.1.0",
-    "serialport": "^6.2.0",
-    "spi": "^0.2.0"
+    "onoff": "^6.0.3",
+    "spi-device": "^3.1.2"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

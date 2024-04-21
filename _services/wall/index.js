@@ -1,10 +1,10 @@
-const SPI = require('spi');
+const SPI = require('spi-device');
 const GR = require('global-rainbow');
 
-const spiWand = new SPI.Spi('/dev/spidev0.0', {maxSpeed:500000, chipSelect: SPI.CS.high});
-const spiTreppe = new SPI.Spi('/dev/spidev0.1', {maxSpeed:500000, chipSelect: SPI.CS.high});
-spiWand.open();
-spiTreppe.open();
+const spiWand = SPI.openSync(0, 0);
+const wandTransfer = (msg) => spiWand.transfer([{sendBuffer: msg, byteLength: msg.length, speedHz: 500000}], () => {});
+const spiTreppe = SPI.openSync(0, 1);
+const treppeTransfer = (msg) => spiTreppe.transfer([{sendBuffer: msg, byteLength: msg.length, speedHz: 500000}], () => {});
 
 const color = new GR();
 const seqWand = [];
@@ -22,11 +22,11 @@ const startDefaultAnimation = () => {
 			return acc;
 		}, []);
 		const pixelsWand = rowWand.concat(rowWand).reduce((acc, color) => acc.concat(color), []);
-		spiWand.write(Buffer.from(pixelsWand), () => {});
+		wandTransfer(Buffer.from(pixelsWand));
 
 		const colorsTreppe = color.get(seqTreppe);
 		const pixelsTreppe = colorsTreppe.reduce((acc, color) => acc.concat(color));
-		spiTreppe.write(Buffer.from(pixelsTreppe), () => {});
+		treppeTransfer(Buffer.from(pixelsTreppe));
 	}, 1000/50);
 };
 const stopDefaultAnimation = () => {
@@ -42,8 +42,8 @@ const displayArtnet = (color) => {
 	const buf = Buffer.allocUnsafe(200 * 3);
 	for (let i = 0; i < buf.length; i++) buf[i] = color[i % 3];
 
-	spiTreppe.write(buf, () => {});
-	spiWand.write(buf, () => {});
+	treppeTransfer(buf);
+	wandTransfer(buf);
 
 	// If no artnet packets are received, start the default animation again
 	if (artnetTimeout) clearTimeout(artnetTimeout);

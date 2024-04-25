@@ -6,8 +6,10 @@
   "private": true,
   "dependencies": {
     "dmx4pi": "^1.0.1",
+    "easy-gpiod": "^0.1.0",
     "global-rainbow": "^1.0.0",
     "onoff": "^6.0.3",
+    "qsem": "^1.0.0",
     "spi-device": "^3.1.2"
   },
   "scripts": {

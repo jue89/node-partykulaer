@@ -1,7 +1,6 @@
-const GR = require('global-rainbow');
 const SPI = require('spi-device');
 
-const spi = new SPI.openSync(1, 0);
+const spi = new SPI.openSync(0, 0);
 const transfer = (msg) => spi.transfer([{sendBuffer: msg, reveiveBuffer: msg, byteLength: msg.length, speedHz: 200000}], () => {});
 
 const shift = (pattern, offset) => pattern.map((row) => {
@@ -36,59 +35,31 @@ const pattern = {
 	]
 };
 
+
 // Default animation
-const color = new GR();
 let patternName = 'doorClosed';
+let color = [0, 0, 0];
 let frame = 0;
-let defInterval;
-const startDefaultAnimation = () => {
-	defInterval = setInterval(() => {
-		// Get current color
-		const curColor = color.get();
+setInterval(() => {
+	// Calc pattern for Firtz Kola
+	const curPattern = pattern[patternName](frame++);
+	const curPixels = pattern2color(curPattern, color);
+	const curRows = curPixels
+		.reverse()
+		.map((row, n) => (n % 2) ? row : row.reverse())
+		.reduce((acc, p) => acc.concat(p), []);
+	const curCols = curRows
+		.reduce((acc, p) => acc.concat(p), []);
 
-		// Calc pattern for Firtz Kola
-		const curPattern = pattern[patternName](frame++);
-		const curPixels = pattern2color(curPattern, curColor);
-		const curRows = curPixels
-			.reverse()
-			.map((row, n) => (n % 2) ? row : row.reverse())
-			.reduce((acc, p) => acc.concat(p), []);
-		const curCols = curRows
-			.reduce((acc, p) => acc.concat(p), []);
-
-		// Send pattern to Fritz Kola
-		transfer(Buffer.from(curCols.concat(curCols)));
-	}, 1000 / 25);
-};
-const stopDefaultAnimation = () => {
-	clearInterval(defInterval);
-	defInterval = undefined;
-}
-
-// Artnet animation
-let artnetTimeout;
-const displayArtnet = (color) => {
-	if (defInterval) stopDefaultAnimation();
-
-	// Send color of the first channel
-	const buf = Buffer.alloc(3 * 24);
-	for (let i = 0; i < buf.length; i++) {
-		buf[i] = color[i % 3];
-	}
-	transfer(buf);
-
-	// If no artnet packets are received, start the default animation again
-	if (artnetTimeout) clearTimeout(artnetTimeout);
-	artnetTimeout = setTimeout(() => startDefaultAnimation(), 5000);
-}
+	// Send pattern to Fritz Kola
+	transfer(Buffer.from(curCols.concat(curCols)));
+}, 1000 / 25);
 
 // Event dispatcher
 process.on('message', (m) => {
 	if (m.event === 'DOOR') {
 		patternName = m.opened ? 'doorOpened' : 'doorClosed';
-	} else if (m.event === 'ARTNET' && m.data.length >= 3) {
-		displayArtnet(m.data);
+	} else if (m.event === 'DMX') {
+		color = m.color;
 	}
 });
-
-startDefaultAnimation();
